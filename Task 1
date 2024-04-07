@@ -1,0 +1,133 @@
+import javafx.application.Application;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
+import javafx.geometry.Insets;
+import javafx.scene.Scene;
+import javafx.scene.control.*;
+import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.scene.layout.GridPane;
+import javafx.stage.Stage;
+
+public class StudentRegistrationForm extends Application {
+
+    private ObservableList<Student> students = FXCollections.observableArrayList();
+
+    @Override
+    public void start(Stage primaryStage) {
+        primaryStage.setTitle("Student Registration Form");
+
+        // Create form components
+        TextField nameField = new TextField();
+        TextField idField = new TextField();
+        TextField emailField = new TextField();
+        ToggleGroup genderGroup = new ToggleGroup();
+        RadioButton maleRadio = new RadioButton("Male");
+        RadioButton femaleRadio = new RadioButton("Female");
+        maleRadio.setToggleGroup(genderGroup);
+        femaleRadio.setToggleGroup(genderGroup);
+        CheckBox termsCheckbox = new CheckBox("I agree to the terms and conditions");
+        Button submitButton = new Button("Register");
+
+        // Create TableView to display student data
+        TableView<Student> tableView = new TableView<>();
+        tableView.setItems(students);
+        TableColumn<Student, String> nameColumn = new TableColumn<>("Name");
+        nameColumn.setCellValueFactory(new PropertyValueFactory<>("name"));
+        TableColumn<Student, String> idColumn = new TableColumn<>("ID");
+        idColumn.setCellValueFactory(new PropertyValueFactory<>("id"));
+        TableColumn<Student, String> emailColumn = new TableColumn<>("Email");
+        emailColumn.setCellValueFactory(new PropertyValueFactory<>("email"));
+        TableColumn<Student, String> genderColumn = new TableColumn<>("Gender");
+        genderColumn.setCellValueFactory(new PropertyValueFactory<>("gender"));
+        tableView.getColumns().addAll(nameColumn, idColumn, emailColumn, genderColumn);
+
+        // Handle form submission
+        submitButton.setOnAction(e -> {
+            String name = nameField.getText();
+            String id = idField.getText();
+            String email = emailField.getText();
+            RadioButton selectedRadio = (RadioButton) genderGroup.getSelectedToggle();
+            String gender = selectedRadio.getText();
+            boolean agreedToTerms = termsCheckbox.isSelected();
+
+            if (!name.isEmpty() && !id.isEmpty() && !email.isEmpty() && agreedToTerms) {
+                Student newStudent = new Student(name, id, email, gender);
+                students.add(newStudent);
+                // Clear form fields after registration
+                nameField.clear();
+                idField.clear();
+                emailField.clear();
+                genderGroup.selectToggle(null);
+                termsCheckbox.setSelected(false);
+            } else {
+                Alert alert = new Alert(Alert.AlertType.WARNING);
+                alert.setTitle("Incomplete Form");
+                alert.setHeaderText(null);
+                alert.setContentText("Please fill out all fields and agree to terms.");
+                alert.showAndWait();
+            }
+        });
+
+        // Create layout for the form
+        GridPane gridPane = new GridPane();
+        gridPane.setPadding(new Insets(20));
+        gridPane.setVgap(10);
+        gridPane.setHgap(10);
+
+        gridPane.add(new Label("Name:"), 0, 0);
+        gridPane.add(nameField, 1, 0);
+        gridPane.add(new Label("ID:"), 0, 1);
+        gridPane.add(idField, 1, 1);
+        gridPane.add(new Label("Email:"), 0, 2);
+        gridPane.add(emailField, 1, 2);
+        gridPane.add(new Label("Gender:"), 0, 3);
+        gridPane.add(maleRadio, 1, 3);
+        gridPane.add(femaleRadio, 2, 3);
+        gridPane.add(new Label("Agree to Terms:"), 0, 4);
+        gridPane.add(termsCheckbox, 1, 4);
+        gridPane.add(submitButton, 1, 5);
+        GridPane.setColumnSpan(submitButton, 2);
+
+        // Add TableView below the form
+        gridPane.add(tableView, 0, 6, 2, 1);
+
+        // Set scene
+        Scene scene = new Scene(gridPane, 600, 400);
+        primaryStage.setScene(scene);
+        primaryStage.show();
+    }
+
+    public static void main(String[] args) {
+        launch(args);
+    }
+
+    public static class Student {
+        private String name;
+        private String id;
+        private String email;
+        private String gender;
+
+        public Student(String name, String id, String email, String gender) {
+            this.name = name;
+            this.id = id;
+            this.email = email;
+            this.gender = gender;
+        }
+
+        public String getName() {
+            return name;
+        }
+
+        public String getId() {
+            return id;
+        }
+
+        public String getEmail() {
+            return email;
+        }
+
+        public String getGender() {
+            return gender;
+        }
+    }
+}
