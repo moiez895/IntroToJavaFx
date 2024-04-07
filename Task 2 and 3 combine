@@ -1,0 +1,170 @@
+import javafx.application.Application;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
+import javafx.scene.Scene;
+import javafx.scene.control.*;
+import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.scene.layout.*;
+import javafx.stage.Stage;
+
+public class AddressBookApp extends Application {
+
+    private TableView<Contact> tableView;
+    private TextField nameField;
+    private TextField phoneField;
+    private TextField emailField;
+
+    private ObservableList<Contact> contacts = FXCollections.observableArrayList();
+
+    @Override
+    public void start(Stage primaryStage) {
+        primaryStage.setTitle("Address Book");
+
+        // Create UI components
+        tableView = new TableView<>();
+        nameField = new TextField();
+        nameField.setPromptText("Name");
+        phoneField = new TextField();
+        phoneField.setPromptText("Phone");
+        emailField = new TextField();
+        emailField.setPromptText("Email");
+        Button addButton = new Button("Add Contact");
+        Button editButton = new Button("Edit Contact");
+        Button deleteButton = new Button("Delete Contact");
+
+        // Set up table columns
+        TableColumn<Contact, String> nameColumn = new TableColumn<>("Name");
+        nameColumn.setCellValueFactory(new PropertyValueFactory<>("name"));
+        TableColumn<Contact, String> phoneColumn = new TableColumn<>("Phone");
+        phoneColumn.setCellValueFactory(new PropertyValueFactory<>("phone"));
+        TableColumn<Contact, String> emailColumn = new TableColumn<>("Email");
+        emailColumn.setCellValueFactory(new PropertyValueFactory<>("email"));
+        tableView.getColumns().addAll(nameColumn, phoneColumn, emailColumn);
+        tableView.setItems(contacts);
+
+        // Handle add button action
+        addButton.setOnAction(e -> addContact());
+        // Handle edit button action
+        editButton.setOnAction(e -> editContact());
+        // Handle delete button action
+        deleteButton.setOnAction(e -> deleteContact());
+
+        // Layout for input fields
+        VBox inputLayout = new VBox(10, nameField, phoneField, emailField, addButton, editButton, deleteButton);
+        inputLayout.setPrefWidth(200);
+
+        // Main layout
+        BorderPane mainLayout = new BorderPane();
+        mainLayout.setLeft(inputLayout);
+        mainLayout.setCenter(tableView);
+
+        // Display the main scene
+        Scene scene = new Scene(mainLayout, 600, 400);
+        primaryStage.setScene(scene);
+        primaryStage.show();
+    }
+
+    private void addContact() {
+        String name = nameField.getText().trim();
+        String phone = phoneField.getText().trim();
+        String email = emailField.getText().trim();
+
+        if (!name.isEmpty() && !phone.isEmpty() && !email.isEmpty()) {
+            Contact newContact = new Contact(name, phone, email);
+            contacts.add(newContact);
+
+            // Clear input fields
+            nameField.clear();
+            phoneField.clear();
+            emailField.clear();
+        } else {
+            // Show alert if any field is empty
+            showAlert("Incomplete Information", "Please fill in all fields.");
+        }
+    }
+
+    private void editContact() {
+        Contact selectedContact = tableView.getSelectionModel().getSelectedItem();
+        if (selectedContact != null) {
+            String newName = nameField.getText().trim();
+            String newPhone = phoneField.getText().trim();
+            String newEmail = emailField.getText().trim();
+
+            if (!newName.isEmpty() && !newPhone.isEmpty() && !newEmail.isEmpty()) {
+                selectedContact.setName(newName);
+                selectedContact.setPhone(newPhone);
+                selectedContact.setEmail(newEmail);
+
+                // Refresh table view
+                tableView.refresh();
+            } else {
+                // Show alert if any field is empty
+                showAlert("Incomplete Information", "Please fill in all fields.");
+            }
+        } else {
+            showAlert("No Contact Selected", "Please select a contact to edit.");
+        }
+    }
+
+    private void deleteContact() {
+        Contact selectedContact = tableView.getSelectionModel().getSelectedItem();
+        if (selectedContact != null) {
+            contacts.remove(selectedContact);
+            // Clear input fields
+            nameField.clear();
+            phoneField.clear();
+            emailField.clear();
+        } else {
+            showAlert("No Contact Selected", "Please select a contact to delete.");
+        }
+    }
+
+    private void showAlert(String title, String message) {
+        Alert alert = new Alert(Alert.AlertType.WARNING);
+        alert.setTitle(title);
+        alert.setHeaderText(null);
+        alert.setContentText(message);
+        alert.showAndWait();
+    }
+
+    public static void main(String[] args) {
+        launch(args);
+    }
+
+    // Contact class
+    public static class Contact {
+        private String name;
+        private String phone;
+        private String email;
+
+        public Contact(String name, String phone, String email) {
+            this.name = name;
+            this.phone = phone;
+            this.email = email;
+        }
+
+        public String getName() {
+            return name;
+        }
+
+        public void setName(String name) {
+            this.name = name;
+        }
+
+        public String getPhone() {
+            return phone;
+        }
+
+        public void setPhone(String phone) {
+            this.phone = phone;
+        }
+
+        public String getEmail() {
+            return email;
+        }
+
+        public void setEmail(String email) {
+            this.email = email;
+        }
+    }
+}
